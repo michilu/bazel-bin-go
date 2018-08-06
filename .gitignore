@@ -1,0 +1,4 @@
+/bazel-bin-go
+
+*.h
+*.so
