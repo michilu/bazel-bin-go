@@ -16,9 +16,14 @@ build:
         fi
         export PATH=$WERCKER_CACHE_DIR/go/bin:$PATH
   - script:
+      name: vgo
+      code: |
+        go get -u golang.org/x/vgo
+  - script:
       name: version
       code: |
         go version
+        vgo version
   - script:
       name: build
       code: |
