@@ -1,5 +1,5 @@
 NAME=$(notdir $(shell go list))
-GOBIN:=go
+GOBIN:=$(shell (type vgo > /dev/null 2>&1) && echo vgo || echo go)
 
 GO:=$(find . -name "*.go" -print)
 LIBGO:=$(wildcard lib/*.go)
