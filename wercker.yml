@@ -1,4 +1,5 @@
 box: blueoceans/golang:1.10.3
+
 build:
   steps:
   - script:
@@ -18,12 +19,15 @@ build:
   - script:
       name: vgo
       code: |
-        go get -u golang.org/x/vgo
+        go get -d golang.org/x/vgo
+        git -C $(go env GOPATH | awk -F: '{print $1}')/src/golang.org/x/vgo checkout 2093985
+        go install golang.org/x/vgo
   - script:
       name: version
       code: |
         go version
         vgo version
+        git -C $(go env GOPATH | awk -F: '{print $1}')/src/golang.org/x/vgo describe --always --dirty=+
   - script:
       name: build
       code: |
@@ -31,6 +35,43 @@ build:
   after-steps:
   - slack-notifier:
       url: $SLACK_URL
+
+vgo-head:
+  steps:
+  - script:
+      name: set -x
+      code: set -x
+  - setup-go-workspace
+  - script:
+      name: setup cache for go
+      code: |
+        mkdir -p "$WERCKER_CACHE_DIR/go"
+        if [ -z "$(go env GOPATH)" ]; then
+        export GOPATH=$WERCKER_CACHE_DIR/go
+        else
+        export GOPATH=$WERCKER_CACHE_DIR/go:$(go env GOPATH)
+        fi
+        export PATH=$WERCKER_CACHE_DIR/go/bin:$PATH
+  - script:
+      name: vgo
+      code: |
+        git -C $(go env GOPATH | awk -F: '{print $1}')/src/golang.org/x/vgo checkout master
+        go get -u golang.org/x/vgo
+  - script:
+      name: version
+      code: |
+        go version
+        vgo version
+        git -C $(go env GOPATH | awk -F: '{print $1}')/src/golang.org/x/vgo describe --always --dirty=+
+  - script:
+      name: build
+      code: |
+        make && fail "build OK!" || echo 'failed'
+  after-steps:
+  - slack-notifier:
+      url: $SLACK_URL
+      notify_on: failed
+
 lint:
   steps:
   - script:
