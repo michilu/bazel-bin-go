@@ -66,7 +66,9 @@ vgo-head:
   - script:
       name: build
       code: |
-        make && fail "build OK!" || echo 'failed'
+        vgo_version=2093985
+        vgo_head=$(git -C $(go env GOPATH | awk -F: '{print $1}')/src/golang.org/x/vgo describe --always)
+        [ "$vgo_head" = "$vgo_version" ] && echo 'specified version. skip the build.' || make && fail "build OK!" || echo 'failed.'
   after-steps:
   - slack-notifier:
       url: $SLACK_URL
