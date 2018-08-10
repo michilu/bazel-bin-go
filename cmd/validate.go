@@ -17,6 +17,7 @@ func isFilePath(s string) bool {
 		if runtime.GOOS != "windows" {
 			return false
 		}
+		return ok
 	default:
 		return ok
 	}
