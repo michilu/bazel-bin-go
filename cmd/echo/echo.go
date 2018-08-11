@@ -1,4 +1,4 @@
-package cmd
+package echo
 
 import (
 	"fmt"
@@ -15,17 +15,17 @@ import (
 )
 
 type (
-	optEcho struct {
+	opt struct {
 		F string `valid:"filepath"`
 	}
 )
 
-func init() {
-	app.AddCommand(newEcho())
+func AddCommand(c *cobra.Command) {
+	c.AddCommand(new())
 }
 
-func newEcho() *cobra.Command {
-	const op = "cmd.newEcho"
+func new() *cobra.Command {
+	const op = "cmd.echo.new"
 	var (
 		f string
 	)
@@ -33,10 +33,10 @@ func newEcho() *cobra.Command {
 		Use:   "echo",
 		Short: "echo",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return preRunEEcho(cmd, args, f)
+			return preRunE(cmd, args, f)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			runEcho(cmd, args, f)
+			run(cmd, args, f)
 		},
 	}
 	c.Flags().StringVarP(&f, "file", "f", "", "filepath")
@@ -44,9 +44,9 @@ func newEcho() *cobra.Command {
 	return c
 }
 
-func preRunEEcho(cmd *cobra.Command, args []string, f string) error {
-	const op = "cmd.echo.preRunEEcho"
-	ok, err := valid.ValidateStruct(&optEcho{})
+func preRunE(cmd *cobra.Command, args []string, f string) error {
+	const op = "cmd.echo.preRunE"
+	ok, err := valid.ValidateStruct(&opt{})
 	if err != nil {
 		return &errs.Error{Op: op, Err: err}
 	}
@@ -68,8 +68,8 @@ func preRunEEcho(cmd *cobra.Command, args []string, f string) error {
 	return nil
 }
 
-func runEcho(cmd *cobra.Command, args []string, f string) {
-	const op = "cmd.echo.runEcho"
+func run(cmd *cobra.Command, args []string, f string) {
+	const op = "cmd.echo.run"
 
 	log.Debug().
 		Str("op", op).
