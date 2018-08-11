@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/michilu/bazel-bin-go/bus"
 	"github.com/michilu/bazel-bin-go/errs"
 	"github.com/michilu/bazel-bin-go/log"
 	"github.com/michilu/bazel-bin-go/meta"
@@ -79,4 +80,5 @@ func Execute() {
 			Err(err).
 			Msg("error")
 	}
+	bus.Wait()
 }
