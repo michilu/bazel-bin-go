@@ -6,14 +6,22 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
 
 	valid "github.com/asaskevich/govalidator"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/codes"
 
+	"github.com/michilu/bazel-bin-go/bazel"
+	"github.com/michilu/bazel-bin-go/bus"
 	"github.com/michilu/bazel-bin-go/errs"
 	"github.com/michilu/bazel-bin-go/log"
+)
+
+var (
+	wgCopy    sync.WaitGroup
+	semaphore = make(chan struct{}, 1)
 )
 
 type (
@@ -78,25 +86,36 @@ func runCopy(cmd *cobra.Command, args []string, f string, t string) {
 	const op = "cmd.copy.runCopy"
 
 	log.Debug().
+		Str("op", op).
 		Str("from", f).
 		Str("to", t).
 		Msg("copy files")
 
+	bus.Subscribe("copy", copyFile)
+	defer wgCopy.Wait()
+	defer bus.Unsubscribe("copy", copyFile)
+
 	err := filepath.Walk(f, func(p string, i os.FileInfo, err error) error {
 		const op = "filepath.Walk"
+
+		log.Debug().
+			Str("op", op).
+			Str("path", p).
+			Msg("start")
+
 		if err != nil {
 			return &errs.Error{Op: op, Err: err}
 		}
 		if i.IsDir() {
 			log.Debug().
+				Str("op", op).
 				Str("path", p).
 				Msg("skip directory")
 			return nil
 		}
-		err = copyFile(p, i, f, t)
-		if err != nil {
-			return &errs.Error{Op: op, Err: err}
-		}
+		semaphore <- struct{}{}
+		bus.Publish("copy", p, i, f, t)
+		wgCopy.Add(1)
 		return nil
 	})
 	if err != nil {
@@ -109,8 +128,11 @@ func runCopy(cmd *cobra.Command, args []string, f string, t string) {
 // https://stackoverflow.com/a/9739903/1085087
 func copyFile(p string, i os.FileInfo, f string, t string) error {
 	const op = "cmd.copy.copyFile"
+	defer wgCopy.Done()
+	defer func() { <-semaphore }()
 
 	log.Debug().
+		Str("op", op).
 		Str("path", p).
 		Msg("copy a file")
 
@@ -131,8 +153,17 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	}()
 
 	log.Debug().
+		Str("op", op).
 		Str("path", p).
 		Msg("opened a source file")
+
+	err = bazel.Query()
+	if err != nil {
+		log.Logger().Warn().
+			Err(&errs.Error{Op: op, Err: err}).
+			Msg("error")
+		return nil
+	}
 
 	fo, err := os.Open(t)
 	if err != nil {
@@ -151,6 +182,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	}()
 
 	log.Debug().
+		Str("op", op).
 		Str("path", t).
 		Msg("opened a destoribute file")
 
