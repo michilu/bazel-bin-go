@@ -24,7 +24,7 @@ type (
 	}
 
 	opt struct {
-		F string `valid:"filepath"`
+		F string `valid:"fileexists"`
 	}
 )
 
@@ -45,14 +45,14 @@ func newCmd() *cobra.Command {
 			run(cmd, args, f)
 		},
 	}
-	c.Flags().StringVarP(&f.filepath, "file", "f", "", "filepath")
+	c.Flags().StringVarP(&f.filepath, "file", "f", "", "path to an exists file")
 	viper.BindPFlag("file", c.Flags().Lookup("file"))
 	return c
 }
 
 func preRunE(cmd *cobra.Command, args []string, f *flag) error {
 	const op = "cmd.echo.preRunE"
-	ok, err := valid.ValidateStruct(&opt{})
+	ok, err := valid.ValidateStruct(&opt{f.filepath})
 	if err != nil {
 		return &errs.Error{Op: op, Err: err}
 	}
