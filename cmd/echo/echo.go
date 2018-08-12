@@ -1,9 +1,6 @@
 package echo
 
 import (
-	"fmt"
-	"os"
-
 	valid "github.com/asaskevich/govalidator"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -58,18 +55,6 @@ func preRunE(cmd *cobra.Command, args []string, f *flag) error {
 	}
 	if !ok {
 		return &errs.Error{Op: op, Code: codes.InvalidArgument.String(), Message: "invalid arguments"}
-	}
-	for _, s := range []string{f.filepath} {
-		if s == "" {
-			continue
-		}
-		i, err := os.Stat(s)
-		if err != nil {
-			return &errs.Error{Op: op, Err: err}
-		}
-		if i.IsDir() {
-			return &errs.Error{Op: op, Code: codes.InvalidArgument.String(), Message: fmt.Sprintf("must be a file: %s", s)}
-		}
 	}
 	return nil
 }
