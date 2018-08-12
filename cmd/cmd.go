@@ -56,7 +56,6 @@ func initialize() {
 				Msg("error")
 		}
 	}
-	debugFlag()
 
 	switch f.config {
 	case "":
@@ -82,6 +81,7 @@ func initialize() {
 		Str("config", viper.ConfigFileUsed()).
 		Msg("using config file")
 
+	debugFlag()
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
