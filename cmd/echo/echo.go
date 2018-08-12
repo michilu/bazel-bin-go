@@ -14,6 +14,10 @@ import (
 	"github.com/michilu/bazel-bin-go/log"
 )
 
+const (
+	topic = "echo"
+)
+
 type (
 	opt struct {
 		F string `valid:"filepath"`
@@ -76,14 +80,14 @@ func run(cmd *cobra.Command, args []string, f string) {
 		Str("f", f).
 		Msg("echo a file")
 
-	bus.Subscribe("echo", echo)
-	bus.Publish("echo", f)
+	bus.Subscribe(topic, echo)
+	bus.Publish(topic, f)
 }
 
 func echo(s string) {
 	const op = "cmd.echo.echo"
 
-	defer bus.Unsubscribe("echo", echo)
+	defer bus.Unsubscribe(topic, echo)
 
 	log.Debug().
 		Str("op", op).
