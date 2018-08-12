@@ -10,8 +10,13 @@ import (
 )
 
 var (
-	parallel  = 1
+	parallel = 1
+
 	semaphore *sem.Semaphore
+)
+
+type (
+	Semaphore = sem.Semaphore
 )
 
 func SetParallel(i int) error {
@@ -23,6 +28,11 @@ func SetParallel(i int) error {
 
 	parallel = i
 	return nil
+}
+
+// New initializes a new instance of the Semaphore, specifying the maximum number of concurrent entries.
+func New(limit int) sem.Semaphore {
+	return sem.New(limit)
 }
 
 // Acquire enters the semaphore a specified number of times, blocking only until ctx is done.

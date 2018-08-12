@@ -24,6 +24,8 @@ const (
 )
 
 var (
+	sem = semaphore.New(1)
+
 	wgCopy sync.WaitGroup
 )
 
@@ -100,7 +102,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 				Msg("skip directory")
 			return nil
 		}
-		_ = semaphore.Acquire(nil, 1)
+		_ = sem.Acquire(nil, 1)
 		bus.Publish(topic, p, i, f.from, f.to)
 		wgCopy.Add(1)
 		return nil
@@ -116,7 +118,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 func copyFile(p string, i os.FileInfo, f string, t string) error {
 	const op = "cmd.copy.copyFile"
 	defer wgCopy.Done()
-	defer func() { semaphore.Release(1) }()
+	defer func() { sem.Release(1) }()
 
 	log.Debug().
 		Str("op", op).
