@@ -9,6 +9,8 @@ import (
 
 var (
 	flag *flags
+
+	defaultP = runtime.NumCPU()
 )
 
 type (
@@ -23,6 +25,10 @@ type (
 	}
 )
 
+func Flag() flags {
+	return *flag
+}
+
 func initFlag() {
 	flag = &flags{}
 	f := flag
@@ -30,7 +36,6 @@ func initFlag() {
 	app.PersistentFlags().StringVar(&f.config, "config", "", fmt.Sprintf("config file (default is %s.yaml)", meta.Name()))
 	app.PersistentFlags().BoolVar(&f.debug, "debug", false, "debug mode")
 
-	defaultP := runtime.NumCPU()
 	if f.debug {
 		defaultP = 0
 	}
