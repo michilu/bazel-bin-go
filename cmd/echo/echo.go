@@ -62,11 +62,6 @@ func preRunE(cmd *cobra.Command, args []string, f *flag) error {
 func run(cmd *cobra.Command, args []string, f *flag) {
 	const op = "cmd.echo.run"
 
-	log.Debug().
-		Str("op", op).
-		Str("filepath", f.filepath).
-		Msg("echo a file")
-
 	bus.Subscribe(topic, echo)
 	bus.Publish(topic, f.filepath)
 }
