@@ -19,6 +19,10 @@ const (
 )
 
 type (
+	flag struct {
+		filepath string
+	}
+
 	opt struct {
 		F string `valid:"filepath"`
 	}
@@ -30,9 +34,7 @@ func AddCommand(c *cobra.Command) {
 
 func newCmd() *cobra.Command {
 	const op = "cmd.echo.new"
-	var (
-		f string
-	)
+	f := &flag{}
 	c := &cobra.Command{
 		Use:   "echo",
 		Short: "echo",
@@ -43,12 +45,12 @@ func newCmd() *cobra.Command {
 			run(cmd, args, f)
 		},
 	}
-	c.Flags().StringVarP(&f, "file", "f", "", "filepath")
+	c.Flags().StringVarP(&f.filepath, "file", "f", "", "filepath")
 	viper.BindPFlag("file", c.Flags().Lookup("file"))
 	return c
 }
 
-func preRunE(cmd *cobra.Command, args []string, f string) error {
+func preRunE(cmd *cobra.Command, args []string, f *flag) error {
 	const op = "cmd.echo.preRunE"
 	ok, err := valid.ValidateStruct(&opt{})
 	if err != nil {
@@ -57,7 +59,7 @@ func preRunE(cmd *cobra.Command, args []string, f string) error {
 	if !ok {
 		return &errs.Error{Op: op, Code: codes.InvalidArgument.String(), Message: "invalid arguments"}
 	}
-	for _, s := range []string{f} {
+	for _, s := range []string{f.filepath} {
 		if s == "" {
 			continue
 		}
@@ -72,16 +74,16 @@ func preRunE(cmd *cobra.Command, args []string, f string) error {
 	return nil
 }
 
-func run(cmd *cobra.Command, args []string, f string) {
+func run(cmd *cobra.Command, args []string, f *flag) {
 	const op = "cmd.echo.run"
 
 	log.Debug().
 		Str("op", op).
-		Str("f", f).
+		Str("filepath", f.filepath).
 		Msg("echo a file")
 
 	bus.Subscribe(topic, echo)
-	bus.Publish(topic, f)
+	bus.Publish(topic, f.filepath)
 }
 
 func echo(s string) {
