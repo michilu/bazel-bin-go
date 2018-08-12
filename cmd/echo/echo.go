@@ -25,10 +25,10 @@ type (
 )
 
 func AddCommand(c *cobra.Command) {
-	c.AddCommand(new())
+	c.AddCommand(newCmd())
 }
 
-func new() *cobra.Command {
+func newCmd() *cobra.Command {
 	const op = "cmd.echo.new"
 	var (
 		f string
