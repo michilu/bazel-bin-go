@@ -21,6 +21,7 @@ func Query() error {
 	c := exec.Command("bazel", "query", "//...")
 
 	log.Debug().
+		Str("op", op).
 		Str("path", c.Path).
 		Strs("args", c.Args).
 		Msg("create exec.Command")
@@ -33,6 +34,7 @@ func Query() error {
 	}
 
 	log.Debug().
+		Str("op", op).
 		Str("path", c.Path).
 		Strs("args", c.Args).
 		Str("stdout", o.String()).
