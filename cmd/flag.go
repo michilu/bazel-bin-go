@@ -10,8 +10,6 @@ import (
 
 var (
 	flag *flags
-
-	defaultP = runtime.NumCPU()
 )
 
 type (
@@ -33,15 +31,9 @@ func Flag() flags {
 func initFlag() {
 	flag = &flags{}
 	f := flag
-
 	app.PersistentFlags().StringVar(&f.config, "config", "", fmt.Sprintf("config file (default is %s.yaml)", meta.Name()))
 	app.PersistentFlags().BoolVar(&f.debug, "debug", false, "debug mode")
-
-	if f.debug {
-		defaultP = 0
-	}
-	app.PersistentFlags().IntVarP(&f.parallel, "parallel", "p", defaultP, "parallel")
-
+	app.PersistentFlags().IntVarP(&f.parallel, "parallel", "p", runtime.NumCPU(), "parallel")
 }
 
 func debugFlag() {

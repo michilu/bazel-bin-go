@@ -20,8 +20,7 @@ import (
 )
 
 var (
-	wgCopy    sync.WaitGroup
-	semaphore = make(chan struct{}, 1)
+	wgCopy sync.WaitGroup
 )
 
 type (
