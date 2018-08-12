@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -18,36 +17,22 @@ import (
 
 var (
 	app *cobra.Command
-	f   *flag
-)
-
-type (
-	flag struct {
-		config string
-		debug  bool
-	}
-
-	opt struct {
-		C string `valid:"fileexists"`
-	}
 )
 
 func init() {
-	f = &flag{}
 	app = &cobra.Command{
 		Use:   meta.Name(),
 		Short: "A command-line tool that copies the Go files from the bazel-bin directory to anywhere.",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return preRunE(cmd, args, f)
+			return preRunE(cmd, args, flag)
 		},
 	}
-	app.PersistentFlags().BoolVar(&f.debug, "debug", false, "debug mode")
-	app.PersistentFlags().StringVar(&f.config, "config", "", fmt.Sprintf("config file (default is %s.yaml)", meta.Name()))
+	initFlag()
 	cobra.OnInitialize(initialize)
 	addCommand()
 }
 
-func preRunE(cmd *cobra.Command, args []string, f *flag) error {
+func preRunE(cmd *cobra.Command, args []string, f *flags) error {
 	const op = "cmd.preRunE"
 	ok, err := valid.ValidateStruct(&opt{f.config})
 	if err != nil {
@@ -61,6 +46,7 @@ func preRunE(cmd *cobra.Command, args []string, f *flag) error {
 
 func initialize() {
 	const op = "cmd.initialize"
+	f := flag
 
 	if f.debug {
 		err := log.SetLevel("debug")
