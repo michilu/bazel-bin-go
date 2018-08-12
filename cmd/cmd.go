@@ -1,12 +1,13 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
+	valid "github.com/asaskevich/govalidator"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc/codes"
 
 	"github.com/michilu/bazel-bin-go/bus"
 	"github.com/michilu/bazel-bin-go/errs"
@@ -16,30 +17,36 @@ import (
 
 var (
 	app *cobra.Command
-	f   *flag
-)
-
-type (
-	flag struct {
-		debug bool
-
-		config string
-	}
 )
 
 func init() {
 	app = &cobra.Command{
 		Use:   meta.Name(),
 		Short: "A command-line tool that copies the Go files from the bazel-bin directory to anywhere.",
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return preRunE(cmd, args, flag)
+		},
 	}
-	f = &flag{}
-	app.PersistentFlags().BoolVar(&f.debug, "debug", false, "debug mode")
-	app.PersistentFlags().StringVar(&f.config, "config", "", fmt.Sprintf("config file (default is %s.yaml)", meta.Name()))
+	initFlag()
 	cobra.OnInitialize(initialize)
+	addCommand()
+}
+
+func preRunE(cmd *cobra.Command, args []string, f *flags) error {
+	const op = "cmd.preRunE"
+	ok, err := valid.ValidateStruct(&opt{f.config})
+	if err != nil {
+		return &errs.Error{Op: op, Err: err}
+	}
+	if !ok {
+		return &errs.Error{Op: op, Code: codes.InvalidArgument.String(), Message: "invalid arguments"}
+	}
+	return nil
 }
 
 func initialize() {
 	const op = "cmd.initialize"
+	f := flag
 
 	if f.debug {
 		err := log.SetLevel("debug")
@@ -60,15 +67,22 @@ func initialize() {
 
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
-	if err != nil {
-		log.Debug().
+	switch err.(type) {
+	case nil,
+		viper.ConfigFileNotFoundError:
+	default:
+		log.Logger().Fatal().
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
-		return
 	}
+
 	log.Debug().
+		Str("op", op).
 		Str("config", viper.ConfigFileUsed()).
 		Msg("using config file")
+
+	debugFlag()
+	setSem()
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

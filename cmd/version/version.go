@@ -1,4 +1,4 @@
-package cmd
+package version
 
 import (
 	"github.com/spf13/cobra"
@@ -6,11 +6,11 @@ import (
 	"github.com/michilu/bazel-bin-go/meta"
 )
 
-func init() {
-	app.AddCommand(newVersion())
+func AddCommand(c *cobra.Command) {
+	c.AddCommand(newCmd())
 }
 
-func newVersion() *cobra.Command {
+func newCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "print version",

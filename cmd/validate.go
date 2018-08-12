@@ -1,25 +1,91 @@
 package cmd
 
 import (
+	"os"
 	"runtime"
 
 	valid "github.com/asaskevich/govalidator"
+
+	"github.com/michilu/bazel-bin-go/errs"
+	"github.com/michilu/bazel-bin-go/log"
 )
 
 func init() {
+	valid.TagMap["direxists"] = isDirExists
+	valid.TagMap["fileexists"] = isFileExists
 	valid.TagMap["filepath"] = isFilePath
+}
+
+func isDirExists(s string) bool {
+	const op = "cmd.validate.isDirExists"
+
+	if s == "" {
+		return false
+	}
+	i, err := os.Stat(s)
+	if err != nil {
+
+		log.Debug().
+			Str("op", op).
+			Str("s", s).
+			Err(&errs.Error{Op: op, Err: err}).
+			Msg("error")
+
+		return false
+	}
+	if !i.IsDir() {
+
+		log.Debug().
+			Str("op", op).
+			Str("s", s).
+			Msgf("%s is a file", s)
+
+		return false
+	}
+
+	return true
+}
+
+func isFileExists(s string) bool {
+	const op = "cmd.validate.isFileExists"
+
+	if s == "" {
+		return false
+	}
+	i, err := os.Stat(s)
+	if err != nil {
+
+		log.Debug().
+			Str("op", op).
+			Str("s", s).
+			Err(&errs.Error{Op: op, Err: err}).
+			Msg("error")
+
+		return false
+	}
+	if i.IsDir() {
+
+		log.Debug().
+			Str("op", op).
+			Str("s", s).
+			Msgf("%s is a directory", s)
+
+		return false
+	}
+
+	return true
 }
 
 func isFilePath(s string) bool {
 	ok, os := valid.IsFilePath(s)
+	if !ok {
+		return false
+	}
 	switch os {
 	case valid.Win:
 		if runtime.GOOS != "windows" {
 			return false
 		}
-		return ok
-	default:
-		return ok
 	}
-	return false
+	return true
 }
