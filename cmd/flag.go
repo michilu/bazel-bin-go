@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/michilu/bazel-bin-go/errs"
 	"github.com/michilu/bazel-bin-go/log"
 	"github.com/michilu/bazel-bin-go/meta"
+	"github.com/michilu/bazel-bin-go/semaphore"
 )
 
 var (
@@ -51,4 +53,16 @@ func debugFlag() {
 		Bool("debug", f.debug).
 		Int("parallel", f.parallel).
 		Msg("flag")
+}
+
+func setSem() {
+	const op = "cmd.setSem"
+
+	err := semaphore.SetParallel(flag.parallel)
+	if err != nil {
+		log.Logger().Fatal().
+			Int("flag.parallel", flag.parallel).
+			Err(&errs.Error{Op: op, Err: err}).
+			Msg("error")
+	}
 }

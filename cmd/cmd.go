@@ -82,7 +82,7 @@ func initialize() {
 		Msg("using config file")
 
 	debugFlag()
-	initSem()
+	setSem()
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

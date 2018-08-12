@@ -17,6 +17,7 @@ import (
 	"github.com/michilu/bazel-bin-go/bus"
 	"github.com/michilu/bazel-bin-go/errs"
 	"github.com/michilu/bazel-bin-go/log"
+	"github.com/michilu/bazel-bin-go/semaphore"
 )
 
 var (
