@@ -56,6 +56,7 @@ func initialize() {
 				Msg("error")
 		}
 	}
+	debugFlag()
 
 	switch f.config {
 	case "":
