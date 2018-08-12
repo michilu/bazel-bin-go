@@ -12,14 +12,14 @@ func init() {
 
 func isFilePath(s string) bool {
 	ok, os := valid.IsFilePath(s)
+	if !ok {
+		return false
+	}
 	switch os {
 	case valid.Win:
 		if runtime.GOOS != "windows" {
 			return false
 		}
-		return ok
-	default:
-		return ok
 	}
-	return false
+	return true
 }
