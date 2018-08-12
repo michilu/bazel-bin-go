@@ -14,8 +14,6 @@ import (
 	"github.com/michilu/bazel-bin-go/errs"
 	"github.com/michilu/bazel-bin-go/log"
 	"github.com/michilu/bazel-bin-go/meta"
-
-	echo "github.com/michilu/bazel-bin-go/cmd/echo"
 )
 
 var (
@@ -46,8 +44,7 @@ func init() {
 	app.PersistentFlags().BoolVar(&f.debug, "debug", false, "debug mode")
 	app.PersistentFlags().StringVar(&f.config, "config", "", fmt.Sprintf("config file (default is %s.yaml)", meta.Name()))
 	cobra.OnInitialize(initialize)
-
-	echo.AddCommand(app)
+	addCommand()
 }
 
 func preRunE(cmd *cobra.Command, args []string, f *flag) error {
