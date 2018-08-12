@@ -26,7 +26,7 @@ const (
 var (
 	sem = semaphore.New(1)
 
-	wgCopy sync.WaitGroup
+	wg sync.WaitGroup
 )
 
 type (
@@ -81,7 +81,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 	const op = "cmd.copy.run"
 
 	bus.Subscribe(topic, copyFile)
-	defer wgCopy.Wait()
+	defer wg.Wait()
 	defer bus.Unsubscribe(topic, copyFile)
 
 	err := filepath.Walk(f.from, func(p string, i os.FileInfo, err error) error {
@@ -104,7 +104,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 		}
 		_ = sem.Acquire(nil, 1)
 		bus.Publish(topic, p, i, f.from, f.to)
-		wgCopy.Add(1)
+		wg.Add(1)
 		return nil
 	})
 	if err != nil {
@@ -117,7 +117,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 // https://stackoverflow.com/a/9739903/1085087
 func copyFile(p string, i os.FileInfo, f string, t string) error {
 	const op = "cmd.copy.copyFile"
-	defer wgCopy.Done()
+	defer wg.Done()
 	defer func() { sem.Release(1) }()
 
 	log.Debug().
