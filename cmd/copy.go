@@ -112,7 +112,7 @@ func runCopy(cmd *cobra.Command, args []string, f string, t string) {
 				Msg("skip directory")
 			return nil
 		}
-		semaphore <- struct{}{}
+		_ = semaphore.Acquire(nil, 1)
 		bus.Publish("copy", p, i, f, t)
 		wgCopy.Add(1)
 		return nil
@@ -128,7 +128,7 @@ func runCopy(cmd *cobra.Command, args []string, f string, t string) {
 func copyFile(p string, i os.FileInfo, f string, t string) error {
 	const op = "cmd.copy.copyFile"
 	defer wgCopy.Done()
-	defer func() { <-semaphore }()
+	defer func() { semaphore.Release(1) }()
 
 	log.Debug().
 		Str("op", op).
