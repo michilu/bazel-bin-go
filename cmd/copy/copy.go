@@ -1,8 +1,7 @@
-package cmd
+package copy
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -20,82 +19,70 @@ import (
 	"github.com/michilu/bazel-bin-go/semaphore"
 )
 
+const (
+	topic = "copy"
+)
+
 var (
 	wgCopy sync.WaitGroup
 )
 
 type (
-	optCopy struct {
-		From string `valid:"filepath"`
-		To   string `valid:"filepath"`
+	flag struct {
+		from string
+		to   string
+	}
+
+	opt struct {
+		F string `valid:"direxists"`
+		T string `valid:"direxists"`
 	}
 )
 
-func init() {
-	app.AddCommand(newCopy())
+func AddCommand(c *cobra.Command) {
+	c.AddCommand(newCmd())
 }
 
-func newCopy() *cobra.Command {
-	const o = "cmd.newCopy"
-	var (
-		f string
-		t string
-	)
+func newCmd() *cobra.Command {
+	const op = "cmd.copy.new"
+	f := &flag{}
 	c := &cobra.Command{
 		Use:   "copy",
 		Short: "copy the Go files",
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return preRunECopy(cmd, args, f, t)
+			return preRunE(cmd, args, f)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			runCopy(cmd, args, f, t)
+			run(cmd, args, f)
 		},
 	}
-	c.Flags().StringVarP(&f, "from", "f", "", "a copy source directory")
+	c.Flags().StringVarP(&f.from, "from", "f", "", "a copy source directory")
 	viper.BindPFlag("from", c.Flags().Lookup("from"))
-	c.Flags().StringVarP(&t, "to", "t", "", "a copy destoribute directory")
+	c.Flags().StringVarP(&f.to, "to", "t", "", "a copy destoribute directory")
 	viper.BindPFlag("to", c.Flags().Lookup("to"))
 	return c
 }
 
-func preRunECopy(cmd *cobra.Command, args []string, f string, t string) error {
-	const op = "cmd.copy.preRunECopy"
-	ok, err := valid.ValidateStruct(&optCopy{})
+func preRunE(cmd *cobra.Command, args []string, f *flag) error {
+	const op = "cmd.copy.preRunE"
+	ok, err := valid.ValidateStruct(&opt{f.from, f.to})
 	if err != nil {
 		return &errs.Error{Op: op, Err: err}
 	}
 	if !ok {
 		return &errs.Error{Op: op, Code: codes.InvalidArgument.String(), Message: "invalid arguments"}
 	}
-	for _, s := range []string{f, t} {
-		if s == "" {
-			continue
-		}
-		i, err := os.Stat(s)
-		if err != nil {
-			return &errs.Error{Op: op, Err: err}
-		}
-		if !i.IsDir() {
-			return &errs.Error{Op: op, Code: codes.InvalidArgument.String(), Message: fmt.Sprintf("must be a directory: %s", s)}
-		}
-	}
 	return nil
 }
 
-func runCopy(cmd *cobra.Command, args []string, f string, t string) {
-	const op = "cmd.copy.runCopy"
+func run(cmd *cobra.Command, args []string, f *flag) {
+	const op = "cmd.copy.run"
 
-	log.Debug().
-		Str("op", op).
-		Str("from", f).
-		Str("to", t).
-		Msg("copy files")
-
-	bus.Subscribe("copy", copyFile)
+	bus.Subscribe(topic, copyFile)
 	defer wgCopy.Wait()
-	defer bus.Unsubscribe("copy", copyFile)
+	defer bus.Unsubscribe(topic, copyFile)
 
-	err := filepath.Walk(f, func(p string, i os.FileInfo, err error) error {
+	err := filepath.Walk(f.from, func(p string, i os.FileInfo, err error) error {
 		const op = "filepath.Walk"
 
 		log.Debug().
@@ -114,7 +101,7 @@ func runCopy(cmd *cobra.Command, args []string, f string, t string) {
 			return nil
 		}
 		_ = semaphore.Acquire(nil, 1)
-		bus.Publish("copy", p, i, f, t)
+		bus.Publish(topic, p, i, f.from, f.to)
 		wgCopy.Add(1)
 		return nil
 	})
