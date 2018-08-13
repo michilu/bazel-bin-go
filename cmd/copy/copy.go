@@ -136,9 +136,9 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	}
 	defer func() {
 		const op = "input.Close"
-		if err := fi.Close(); err != nil {
+		if e := fi.Close(); e != nil {
 			log.Logger().Warn().
-				Err(&errs.Error{Op: op, Err: err}).
+				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 		}
 	}()
@@ -165,9 +165,9 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	}
 	defer func() {
 		const op = "output.Close"
-		if err := fo.Close(); err != nil {
+		if e := fo.Close(); e != nil {
 			log.Logger().Warn().
-				Err(&errs.Error{Op: op, Err: err}).
+				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 		}
 	}()
@@ -181,19 +181,19 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	w := bufio.NewWriter(fo)
 	buf := make([]byte, 1024)
 	for {
-		n, err := r.Read(buf)
-		if err != nil && err != io.EOF {
+		n, e := r.Read(buf)
+		if err != nil && e != io.EOF {
 			log.Logger().Warn().
-				Err(&errs.Error{Op: op, Err: err}).
+				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 			break
 		}
 		if n == 0 {
 			break
 		}
-		if _, err := w.Write(buf[:n]); err != nil {
+		if _, e := w.Write(buf[:n]); e != nil {
 			log.Logger().Warn().
-				Err(&errs.Error{Op: op, Err: err}).
+				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 			break
 		}
