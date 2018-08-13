@@ -52,6 +52,10 @@ func init() {
 			Os:      runtime.GOOS,
 		},
 	}
+
+	if build == "" {
+		return
+	}
 	t, err := time.Parse(buildFmt, build)
 	if err != nil {
 		log.Logger().Fatal().
@@ -59,6 +63,7 @@ func init() {
 			Msg("error")
 	}
 	m.Build = t
+
 }
 
 // Get returns a fmt.Stringer.
