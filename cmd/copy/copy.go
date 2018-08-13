@@ -149,7 +149,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		Str("path", p).
 		Msg("copy a file")
 
-	bi, err := ioutil.ReadFile(p)
+	bi, err := ioutil.ReadFile(p) // #nosec
 	if err != nil {
 		log.Logger().Warn().
 			Err(&errs.Error{Op: op, Err: err}).
@@ -170,7 +170,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		return nil
 	}
 
-	fo, err := os.Open(t)
+	fo, err := os.Open(t) // #nosec
 	if err != nil {
 		log.Logger().Warn().
 			Err(&errs.Error{Op: op, Err: err}).
