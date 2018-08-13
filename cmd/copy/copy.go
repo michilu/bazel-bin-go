@@ -83,11 +83,26 @@ func preRunE(cmd *cobra.Command, args []string, f *flag) error {
 func run(cmd *cobra.Command, args []string, f *flag) {
 	const op = "cmd.copy.run"
 
-	bus.Subscribe(topic, copyFile)
+	err := bus.Subscribe(topic, copyFile)
+	if err != nil {
+		log.Logger().Fatal().
+			Str("op", op).
+			Err(&errs.Error{Op: op, Err: err}).
+			Msg("error")
+	}
 	defer wg.Wait()
-	defer bus.Unsubscribe(topic, copyFile)
+	defer func() {
+		const op = "cmd.copy.run#defer"
+		e := bus.Unsubscribe(topic, copyFile)
+		if e != nil {
+			log.Logger().Fatal().
+				Str("op", op).
+				Err(&errs.Error{Op: op, Err: e}).
+				Msg("error")
+		}
+	}()
 
-	err := filepath.Walk(f.from, func(p string, i os.FileInfo, err error) error {
+	err = filepath.Walk(f.from, func(p string, i os.FileInfo, err error) error {
 		const op = "filepath.Walk"
 
 		log.Debug().

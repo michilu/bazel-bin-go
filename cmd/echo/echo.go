@@ -62,14 +62,29 @@ func preRunE(cmd *cobra.Command, args []string, f *flag) error {
 func run(cmd *cobra.Command, args []string, f *flag) {
 	const op = "cmd.echo.run"
 
-	bus.Subscribe(topic, echo)
+	err := bus.Subscribe(topic, echo)
+	if err != nil {
+		log.Logger().Fatal().
+			Str("op", op).
+			Err(&errs.Error{Op: op, Err: err}).
+			Msg("error")
+	}
 	bus.Publish(topic, f.filepath)
 }
 
 func echo(s string) {
 	const op = "cmd.echo.echo"
 
-	defer bus.Unsubscribe(topic, echo)
+	defer func() {
+		const op = "cmd.echo.echo#defer"
+		err := bus.Unsubscribe(topic, echo)
+		if err != nil {
+			log.Logger().Fatal().
+				Str("op", op).
+				Err(&errs.Error{Op: op, Err: err}).
+				Msg("error")
+		}
+	}()
 
 	log.Debug().
 		Str("op", op).
