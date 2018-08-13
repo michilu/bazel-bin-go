@@ -41,7 +41,13 @@ func (e *Error) Error() string {
 	// If wrapping an error, print its Error() message.
 	// Otherwise print the error code & message.
 	if e.Err != nil {
-		buf.WriteString(e.Err.Error())
+		_, err := buf.WriteString(e.Err.Error())
+		if err != nil {
+			log.Logger().Error().
+				Str("op", op).
+				Err(&Error{Op: op, Err: err}).
+				Msg("error")
+		}
 	} else {
 		if e.Code != "" {
 			_, err := fmt.Fprintf(&buf, "<%s> ", e.Code)
@@ -52,7 +58,13 @@ func (e *Error) Error() string {
 					Msg("error")
 			}
 		}
-		buf.WriteString(e.Message)
+		_, err := buf.WriteString(e.Message)
+		if err != nil {
+			log.Logger().Error().
+				Str("op", op).
+				Err(&Error{Op: op, Err: err}).
+				Msg("error")
+		}
 	}
 	return buf.String()
 }

@@ -121,7 +121,10 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 			return nil
 		}
 		//lint:ignore SA1012 Pass a nil `context.Context` for speedup.
-		_ = sem.Acquire(nil, 1)
+		err = sem.Acquire(nil, 1)
+		if err != nil {
+			return &errs.Error{Op: op, Err: err}
+		}
 		bus.Publish(topic, p, i, f.from, f.to)
 		wg.Add(1)
 		return nil

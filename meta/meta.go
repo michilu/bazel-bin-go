@@ -6,6 +6,9 @@ import (
 	"time"
 
 	"gopkg.in/yaml.v2"
+
+	"github.com/michilu/bazel-bin-go/errs"
+	"github.com/michilu/bazel-bin-go/log"
 )
 
 var (
@@ -37,6 +40,7 @@ func (m meta) String() string {
 }
 
 func init() {
+	const op = "meta.init"
 	m = &meta{
 		Name:   name,
 		Hash:   hash,
@@ -48,7 +52,13 @@ func init() {
 			Os:      runtime.GOOS,
 		},
 	}
-	m.Build, _ = time.Parse(buildFmt, build)
+	t, err := time.Parse(buildFmt, build)
+	if err != nil {
+		log.Logger().Fatal().
+			Err(&errs.Error{Op: op, Err: err}).
+			Msg("error")
+	}
+	m.Build = t
 }
 
 // Get returns a fmt.Stringer.
