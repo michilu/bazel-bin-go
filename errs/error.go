@@ -5,6 +5,8 @@ package errs
 import (
 	"bytes"
 	"fmt"
+
+	"github.com/michilu/bazel-bin-go/log"
 )
 
 // Error defines a standard application error.
@@ -22,11 +24,18 @@ type Error struct {
 
 // Error returns the string representation of the error message.
 func (e *Error) Error() string {
+	const op = "errs.Error.Error()"
 	var buf bytes.Buffer
 
 	// Print the current operation in our stack, if any.
 	if e.Op != "" {
-		fmt.Fprintf(&buf, "%s: ", e.Op)
+		_, err := fmt.Fprintf(&buf, "%s: ", e.Op)
+		if err != nil {
+			log.Logger().Error().
+				Str("op", op).
+				Err(&Error{Op: op, Err: err}).
+				Msg("error")
+		}
 	}
 
 	// If wrapping an error, print its Error() message.
@@ -35,7 +44,13 @@ func (e *Error) Error() string {
 		buf.WriteString(e.Err.Error())
 	} else {
 		if e.Code != "" {
-			fmt.Fprintf(&buf, "<%s> ", e.Code)
+			_, err := fmt.Fprintf(&buf, "<%s> ", e.Code)
+			if err != nil {
+				log.Logger().Error().
+					Str("op", op).
+					Err(&Error{Op: op, Err: err}).
+					Msg("error")
+			}
 		}
 		buf.WriteString(e.Message)
 	}

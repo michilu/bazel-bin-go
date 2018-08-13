@@ -6,17 +6,13 @@ import (
 	"github.com/michilu/bazel-bin-go/meta"
 )
 
-// AddCommand adds commands to given the command.
-func AddCommand(cmd *cobra.Command) {
-	cmd.AddCommand(newCmd())
-}
-
-func newCmd() *cobra.Command {
+// New returns a new command.
+func New() (*cobra.Command, error) {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "print version",
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Print(meta.Get())
 		},
-	}
+	}, nil
 }

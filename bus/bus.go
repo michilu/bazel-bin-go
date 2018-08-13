@@ -5,6 +5,8 @@ import (
 
 	"github.com/michilu/bazel-bin-go/log"
 	"github.com/vardius/message-bus"
+
+	"github.com/michilu/bazel-bin-go/errs"
 )
 
 var (
@@ -29,7 +31,10 @@ func Subscribe(topic string, fn interface{}) error {
 		Str("topic", topic).
 		Msg("start")
 
-	bus.Subscribe(topic, fn)
+	err := bus.Subscribe(topic, fn)
+	if err != nil {
+		return &errs.Error{Op: op, Err: err}
+	}
 	wg.Add(1)
 
 	log.Debug().
@@ -50,7 +55,10 @@ func Unsubscribe(topic string, fn interface{}) error {
 		Str("topic", topic).
 		Msg("start")
 
-	bus.Unsubscribe(topic, fn)
+	err := bus.Unsubscribe(topic, fn)
+	if err != nil {
+		return &errs.Error{Op: op, Err: err}
+	}
 
 	log.Debug().
 		Str("op", op).

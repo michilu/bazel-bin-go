@@ -41,12 +41,8 @@ type (
 	}
 )
 
-// AddCommand adds commands to the given command.
-func AddCommand(cmd *cobra.Command) {
-	cmd.AddCommand(newCmd())
-}
-
-func newCmd() *cobra.Command {
+// New returns a new command.
+func New() (*cobra.Command, error) {
 	const op = "cmd.copy.new"
 	f := &flag{}
 	c := &cobra.Command{
@@ -60,10 +56,16 @@ func newCmd() *cobra.Command {
 		},
 	}
 	c.Flags().StringVarP(&f.from, "from", "f", "", "a copy source directory")
-	viper.BindPFlag("from", c.Flags().Lookup("from"))
+	err := viper.BindPFlag("from", c.Flags().Lookup("from"))
+	if err != nil {
+		return nil, &errs.Error{Op: op, Err: err}
+	}
 	c.Flags().StringVarP(&f.to, "to", "t", "", "a copy destoribute directory")
-	viper.BindPFlag("to", c.Flags().Lookup("to"))
-	return c
+	err = viper.BindPFlag("to", c.Flags().Lookup("to"))
+	if err != nil {
+		return nil, &errs.Error{Op: op, Err: err}
+	}
+	return c, nil
 }
 
 func preRunE(cmd *cobra.Command, args []string, f *flag) error {

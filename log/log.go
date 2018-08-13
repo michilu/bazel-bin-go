@@ -5,8 +5,6 @@ import (
 	"os"
 
 	"github.com/rs/zerolog"
-
-	"github.com/michilu/bazel-bin-go/errs"
 )
 
 var (
@@ -35,10 +33,9 @@ func setDefaultLogger() {
 
 // SetLevel sets the global override for log level.
 func SetLevel(s string) error {
-	const op = "log.SetLevel"
 	l, err := zerolog.ParseLevel(s)
 	if err != nil {
-		return &errs.Error{Op: op, Err: err}
+		return err
 	}
 	zerolog.SetGlobalLevel(l)
 	switch l {

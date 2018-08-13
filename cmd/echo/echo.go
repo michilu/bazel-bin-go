@@ -25,12 +25,8 @@ type (
 	}
 )
 
-// AddCommand adds commands to given the command.
-func AddCommand(cmd *cobra.Command) {
-	cmd.AddCommand(newCmd())
-}
-
-func newCmd() *cobra.Command {
+// New returns a new command.
+func New() (*cobra.Command, error) {
 	const op = "cmd.echo.new"
 	f := &flag{}
 	c := &cobra.Command{
@@ -44,8 +40,11 @@ func newCmd() *cobra.Command {
 		},
 	}
 	c.Flags().StringVarP(&f.filepath, "file", "f", "", "path to an exists file")
-	viper.BindPFlag("file", c.Flags().Lookup("file"))
-	return c
+	err := viper.BindPFlag("file", c.Flags().Lookup("file"))
+	if err != nil {
+		return nil, &errs.Error{Op: op, Err: err}
+	}
+	return c, nil
 }
 
 func preRunE(cmd *cobra.Command, args []string, f *flag) error {
