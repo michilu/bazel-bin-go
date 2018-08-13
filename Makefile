@@ -62,3 +62,5 @@ lint:
 review:
 	$(MAKE) lint COMMIT:=master
 
+review-dupl:
+	-git diff $(COMMIT) HEAD --name-only --diff-filter=AM|grep -e "\.go$$" | xargs dupl
