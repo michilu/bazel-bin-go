@@ -41,8 +41,9 @@ type (
 	}
 )
 
-func AddCommand(c *cobra.Command) {
-	c.AddCommand(newCmd())
+// AddCommand adds commands to the given command.
+func AddCommand(cmd *cobra.Command) {
+	cmd.AddCommand(newCmd())
 }
 
 func newCmd() *cobra.Command {
@@ -102,6 +103,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 				Msg("skip directory")
 			return nil
 		}
+		//lint:ignore SA1012 Pass a nil `context.Context` for speedup.
 		_ = sem.Acquire(nil, 1)
 		bus.Publish(topic, p, i, f.from, f.to)
 		wg.Add(1)

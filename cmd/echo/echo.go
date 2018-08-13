@@ -25,8 +25,9 @@ type (
 	}
 )
 
-func AddCommand(c *cobra.Command) {
-	c.AddCommand(newCmd())
+// AddCommand adds commands to given the command.
+func AddCommand(cmd *cobra.Command) {
+	cmd.AddCommand(newCmd())
 }
 
 func newCmd() *cobra.Command {

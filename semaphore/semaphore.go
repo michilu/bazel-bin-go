@@ -16,9 +16,11 @@ var (
 )
 
 type (
+	// Semaphore counting resizable semaphore synchronization primitive.
 	Semaphore = sem.Semaphore
 )
 
+// SetParallel sets a given number to the parallelism number.
 func SetParallel(i int) error {
 	const op = "semaphore.SetParallel"
 

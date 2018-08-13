@@ -33,6 +33,7 @@ func setDefaultLogger() {
 	log.SetFlags(0)
 }
 
+// SetLevel sets the global override for log level.
 func SetLevel(s string) error {
 	const op = "log.SetLevel"
 	l, err := zerolog.ParseLevel(s)
@@ -51,10 +52,12 @@ func SetLevel(s string) error {
 	return nil
 }
 
+// Logger returns the root logger.
 func Logger() *zerolog.Logger {
 	return &logger
 }
 
+// Debug starts a new message with debug level.
 func Debug() *zerolog.Event {
 	return logger.Debug()
 }

@@ -26,10 +26,6 @@ type (
 	}
 )
 
-func Flag() flags {
-	return *flag
-}
-
 func initFlag() {
 	flag = &flags{}
 	f := flag
