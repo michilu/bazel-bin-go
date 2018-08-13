@@ -33,6 +33,8 @@ build:
       code: |
         make
         ./bazel-bin-go version
+        vgo build
+        ./bazel-bin-go version
   after-steps:
   - slack-notifier:
       url: $SLACK_URL
