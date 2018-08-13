@@ -47,9 +47,9 @@ lint:
 	@echo
 	-goconst $(GOLIST) $(REVIEWDOG)
 	@echo
-	-$(GOBIN) vet $(GOLIST) $(REVIEWDOG)
+	-go vet $(GOLIST) $(REVIEWDOG)
 	@echo
-	-$(GOBIN) vet -shadow $(GOLIST) $(REVIEWDOG)
+	-go vet -shadow $(GOLIST) $(REVIEWDOG)
 	@echo
 	-aligncheck $(GOLIST) $(REVIEWDOG)
 	@echo
