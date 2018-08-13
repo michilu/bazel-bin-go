@@ -3,3 +3,4 @@
 *.h
 *.so
 /go.sum
+/vendor

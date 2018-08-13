@@ -25,11 +25,8 @@ type (
 	}
 )
 
-func AddCommand(c *cobra.Command) {
-	c.AddCommand(newCmd())
-}
-
-func newCmd() *cobra.Command {
+// New returns a new command.
+func New() (*cobra.Command, error) {
 	const op = "cmd.echo.new"
 	f := &flag{}
 	c := &cobra.Command{
@@ -43,8 +40,11 @@ func newCmd() *cobra.Command {
 		},
 	}
 	c.Flags().StringVarP(&f.filepath, "file", "f", "", "path to an exists file")
-	viper.BindPFlag("file", c.Flags().Lookup("file"))
-	return c
+	err := viper.BindPFlag("file", c.Flags().Lookup("file"))
+	if err != nil {
+		return nil, &errs.Error{Op: op, Err: err}
+	}
+	return c, nil
 }
 
 func preRunE(cmd *cobra.Command, args []string, f *flag) error {
@@ -62,14 +62,29 @@ func preRunE(cmd *cobra.Command, args []string, f *flag) error {
 func run(cmd *cobra.Command, args []string, f *flag) {
 	const op = "cmd.echo.run"
 
-	bus.Subscribe(topic, echo)
+	err := bus.Subscribe(topic, echo)
+	if err != nil {
+		log.Logger().Fatal().
+			Str("op", op).
+			Err(&errs.Error{Op: op, Err: err}).
+			Msg("error")
+	}
 	bus.Publish(topic, f.filepath)
 }
 
 func echo(s string) {
 	const op = "cmd.echo.echo"
 
-	defer bus.Unsubscribe(topic, echo)
+	defer func() {
+		const op = "cmd.echo.echo#defer"
+		err := bus.Unsubscribe(topic, echo)
+		if err != nil {
+			log.Logger().Fatal().
+				Str("op", op).
+				Err(&errs.Error{Op: op, Err: err}).
+				Msg("error")
+		}
+	}()
 
 	log.Debug().
 		Str("op", op).

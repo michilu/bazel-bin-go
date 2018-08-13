@@ -1,9 +1,14 @@
-GOBIN:=$(shell (type vgo > /dev/null 2>&1) && echo vgo || echo go)
-PKG:=$(shell go list)
-NAME:=$(notdir $(PKG))
 PROJECT_SINCE:=$(shell git log --pretty=format:"%ad" --date=unix|tail -1)
 AUTO_COUNT_SINCE:=$(shell echo $$(((`date -u +%s`-$(PROJECT_SINCE))/(24*60*60))))
 AUTO_COUNT_LOG:=$(shell git log --since=midnight --oneline|wc -l|tr -d " ")
+COMMIT:=4b825dc
+REVIEWDOG:=| reviewdog -efm='%f:%l:%c: %m' -diff="git diff $(COMMIT) HEAD"
+
+GOBIN:=$(shell (type vgo > /dev/null 2>&1) && echo vgo || echo go)
+PKG:=$(shell $(GOBIN) list)
+NAME:=$(notdir $(PKG))
+GOLIST:=$(shell $(GOBIN) list ./...)
+GODIR:=$(patsubst $(PKG)/%,%,$(wordlist 2,$(words $(GOLIST)),$(GOLIST)))
 
 GO:=$(find . -name "*.go" -print)
 LIBGO:=$(wildcard lib/*.go)
@@ -26,8 +31,36 @@ clean:
 test:
 	$(GOBIN) test
 
-golint:
-	$(GOBIN) list ./... | xargs -L1 golint
+lint:
+	[ "$(GOBIN)" = "vgo" ] && $(GOBIN) mod -vendor
+	-echo $(GOLIST) | xargs -L1 golint
+	@echo
+	-deadcode $(GODIR) 2>&1
+	@echo
+	-find $(GODIR) -type f -exec misspell {} \; $(REVIEWDOG)
+	@echo
+	-staticcheck $(GOLIST) $(REVIEWDOG)
+	@echo
+	-errcheck $(GOLIST) $(REVIEWDOG)
+	@echo
+	-safesql $(GOLIST)
+	@echo
+	-goconst $(GOLIST) $(REVIEWDOG)
+	@echo
+	-go vet $(GOLIST) $(REVIEWDOG)
+	@echo
+	-go vet -shadow $(GOLIST) $(REVIEWDOG)
+	@echo
+	-aligncheck $(GOLIST) $(REVIEWDOG)
+	@echo
+	-gosimple $(GOLIST) $(REVIEWDOG)
+	@echo
+	-unconvert $(GOLIST) $(REVIEWDOG)
+	@echo
+	-interfacer $(GOLIST) $(REVIEWDOG)
 
-reviewdog:
-	$(GOBIN) list ./... | xargs -L1 golint | reviewdog -f=golint -diff="git diff master"
+review:
+	$(MAKE) lint COMMIT:=master
+
+review-dupl:
+	-git diff $(COMMIT) HEAD --name-only --diff-filter=AM|grep -e "\.go$$" | xargs dupl

@@ -2,7 +2,9 @@ package copy
 
 import (
 	"bufio"
+	"bytes"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -26,7 +28,7 @@ const (
 var (
 	sem = semaphore.New(1)
 
-	wgCopy sync.WaitGroup
+	wg sync.WaitGroup
 )
 
 type (
@@ -41,11 +43,8 @@ type (
 	}
 )
 
-func AddCommand(c *cobra.Command) {
-	c.AddCommand(newCmd())
-}
-
-func newCmd() *cobra.Command {
+// New returns a new command.
+func New() (*cobra.Command, error) {
 	const op = "cmd.copy.new"
 	f := &flag{}
 	c := &cobra.Command{
@@ -59,10 +58,16 @@ func newCmd() *cobra.Command {
 		},
 	}
 	c.Flags().StringVarP(&f.from, "from", "f", "", "a copy source directory")
-	viper.BindPFlag("from", c.Flags().Lookup("from"))
+	err := viper.BindPFlag("from", c.Flags().Lookup("from"))
+	if err != nil {
+		return nil, &errs.Error{Op: op, Err: err}
+	}
 	c.Flags().StringVarP(&f.to, "to", "t", "", "a copy destoribute directory")
-	viper.BindPFlag("to", c.Flags().Lookup("to"))
-	return c
+	err = viper.BindPFlag("to", c.Flags().Lookup("to"))
+	if err != nil {
+		return nil, &errs.Error{Op: op, Err: err}
+	}
+	return c, nil
 }
 
 func preRunE(cmd *cobra.Command, args []string, f *flag) error {
@@ -80,11 +85,26 @@ func preRunE(cmd *cobra.Command, args []string, f *flag) error {
 func run(cmd *cobra.Command, args []string, f *flag) {
 	const op = "cmd.copy.run"
 
-	bus.Subscribe(topic, copyFile)
-	defer wgCopy.Wait()
-	defer bus.Unsubscribe(topic, copyFile)
+	err := bus.Subscribe(topic, copyFile)
+	if err != nil {
+		log.Logger().Fatal().
+			Str("op", op).
+			Err(&errs.Error{Op: op, Err: err}).
+			Msg("error")
+	}
+	defer wg.Wait()
+	defer func() {
+		const op = "cmd.copy.run#defer"
+		e := bus.Unsubscribe(topic, copyFile)
+		if e != nil {
+			log.Logger().Fatal().
+				Str("op", op).
+				Err(&errs.Error{Op: op, Err: e}).
+				Msg("error")
+		}
+	}()
 
-	err := filepath.Walk(f.from, func(p string, i os.FileInfo, err error) error {
+	err = filepath.Walk(f.from, func(p string, i os.FileInfo, err error) error {
 		const op = "filepath.Walk"
 
 		log.Debug().
@@ -102,9 +122,13 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 				Msg("skip directory")
 			return nil
 		}
-		_ = sem.Acquire(nil, 1)
+		//lint:ignore SA1012 Pass a nil `context.Context` for speedup.
+		err = sem.Acquire(nil, 1)
+		if err != nil {
+			return &errs.Error{Op: op, Err: err}
+		}
 		bus.Publish(topic, p, i, f.from, f.to)
-		wgCopy.Add(1)
+		wg.Add(1)
 		return nil
 	})
 	if err != nil {
@@ -117,7 +141,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 // https://stackoverflow.com/a/9739903/1085087
 func copyFile(p string, i os.FileInfo, f string, t string) error {
 	const op = "cmd.copy.copyFile"
-	defer wgCopy.Done()
+	defer wg.Done()
 	defer func() { sem.Release(1) }()
 
 	log.Debug().
@@ -125,21 +149,13 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		Str("path", p).
 		Msg("copy a file")
 
-	fi, err := os.Open(p)
+	bi, err := ioutil.ReadFile(p) // #nosec
 	if err != nil {
 		log.Logger().Warn().
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 		return nil
 	}
-	defer func() {
-		const op = "input.Close"
-		if err := fi.Close(); err != nil {
-			log.Logger().Warn().
-				Err(&errs.Error{Op: op, Err: err}).
-				Msg("error")
-		}
-	}()
 
 	log.Debug().
 		Str("op", op).
@@ -154,7 +170,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		return nil
 	}
 
-	fo, err := os.Open(t)
+	fo, err := os.Open(t) // #nosec
 	if err != nil {
 		log.Logger().Warn().
 			Err(&errs.Error{Op: op, Err: err}).
@@ -163,9 +179,9 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	}
 	defer func() {
 		const op = "output.Close"
-		if err := fo.Close(); err != nil {
+		if e := fo.Close(); e != nil {
 			log.Logger().Warn().
-				Err(&errs.Error{Op: op, Err: err}).
+				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 		}
 	}()
@@ -175,23 +191,23 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		Str("path", t).
 		Msg("opened a destoribute file")
 
-	r := bufio.NewReader(fi)
+	r := bytes.NewReader(bi)
 	w := bufio.NewWriter(fo)
 	buf := make([]byte, 1024)
 	for {
-		n, err := r.Read(buf)
-		if err != nil && err != io.EOF {
+		n, e := r.Read(buf)
+		if err != nil && e != io.EOF {
 			log.Logger().Warn().
-				Err(&errs.Error{Op: op, Err: err}).
+				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 			break
 		}
 		if n == 0 {
 			break
 		}
-		if _, err := w.Write(buf[:n]); err != nil {
+		if _, e := w.Write(buf[:n]); e != nil {
 			log.Logger().Warn().
-				Err(&errs.Error{Op: op, Err: err}).
+				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 			break
 		}

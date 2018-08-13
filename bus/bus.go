@@ -5,12 +5,15 @@ import (
 
 	"github.com/michilu/bazel-bin-go/log"
 	"github.com/vardius/message-bus"
+
+	"github.com/michilu/bazel-bin-go/errs"
 )
 
 var (
 	bus messagebus.MessageBus
 	wg  sync.WaitGroup
 
+	// Publish publishes arguments to the given topic subscribers.
 	Publish func(topic string, args ...interface{})
 )
 
@@ -19,6 +22,7 @@ func init() {
 	Publish = bus.Publish
 }
 
+// Subscribe subscribes to the given topic.
 func Subscribe(topic string, fn interface{}) error {
 	const op = "bus.Subscribe"
 
@@ -27,7 +31,10 @@ func Subscribe(topic string, fn interface{}) error {
 		Str("topic", topic).
 		Msg("start")
 
-	bus.Subscribe(topic, fn)
+	err := bus.Subscribe(topic, fn)
+	if err != nil {
+		return &errs.Error{Op: op, Err: err}
+	}
 	wg.Add(1)
 
 	log.Debug().
@@ -38,6 +45,7 @@ func Subscribe(topic string, fn interface{}) error {
 	return nil
 }
 
+// Unsubscribe unsubsribes from the given topic.
 func Unsubscribe(topic string, fn interface{}) error {
 	const op = "bus.Unsubscribe"
 	defer wg.Done()
@@ -47,7 +55,10 @@ func Unsubscribe(topic string, fn interface{}) error {
 		Str("topic", topic).
 		Msg("start")
 
-	bus.Unsubscribe(topic, fn)
+	err := bus.Unsubscribe(topic, fn)
+	if err != nil {
+		return &errs.Error{Op: op, Err: err}
+	}
 
 	log.Debug().
 		Str("op", op).
@@ -57,6 +68,7 @@ func Unsubscribe(topic string, fn interface{}) error {
 	return nil
 }
 
+// Wait waits until unsubscribe all subscribers.
 func Wait() {
 	wg.Wait()
 }
