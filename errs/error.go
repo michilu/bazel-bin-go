@@ -4,9 +4,6 @@ package errs
 
 import (
 	"bytes"
-	"fmt"
-
-	"github.com/michilu/bazel-bin-go/log"
 )
 
 // Error defines a standard application error.
@@ -29,42 +26,19 @@ func (e *Error) Error() string {
 
 	// Print the current operation in our stack, if any.
 	if e.Op != "" {
-		_, err := fmt.Fprintf(&buf, "%s: ", e.Op)
-		if err != nil {
-			log.Logger().Error().
-				Str("op", op).
-				Err(&Error{Op: op, Err: err}).
-				Msg("error")
-		}
+		buf.WriteString(e.Op + ": ") // #nosec err is always nil https://golang.org/pkg/bytes/#Buffer.WriteString
 	}
 
 	// If wrapping an error, print its Error() message.
 	// Otherwise print the error code & message.
 	if e.Err != nil {
-		_, err := buf.WriteString(e.Err.Error())
-		if err != nil {
-			log.Logger().Error().
-				Str("op", op).
-				Err(&Error{Op: op, Err: err}).
-				Msg("error")
-		}
+		buf.WriteString(e.Err.Error()) // #nosec err is always nil https://golang.org/pkg/bytes/#Buffer.WriteString
 	} else {
 		if e.Code != "" {
-			_, err := fmt.Fprintf(&buf, "<%s> ", e.Code)
-			if err != nil {
-				log.Logger().Error().
-					Str("op", op).
-					Err(&Error{Op: op, Err: err}).
-					Msg("error")
-			}
+			buf.WriteString("<" + e.Code + "> ") // #nosec err is always nil https://golang.org/pkg/bytes/#Buffer.WriteString
 		}
-		_, err := buf.WriteString(e.Message)
-		if err != nil {
-			log.Logger().Error().
-				Str("op", op).
-				Err(&Error{Op: op, Err: err}).
-				Msg("error")
-		}
+		buf.WriteString(e.Message) // #nosec err is always nil https://golang.org/pkg/bytes/#Buffer.WriteString
 	}
+
 	return buf.String()
 }
