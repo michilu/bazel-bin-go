@@ -2,7 +2,9 @@ package copy
 
 import (
 	"bufio"
+	"bytes"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
@@ -147,21 +149,13 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		Str("path", p).
 		Msg("copy a file")
 
-	fi, err := os.Open(p)
+	bi, err := ioutil.ReadFile(p)
 	if err != nil {
 		log.Logger().Warn().
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 		return nil
 	}
-	defer func() {
-		const op = "input.Close"
-		if e := fi.Close(); e != nil {
-			log.Logger().Warn().
-				Err(&errs.Error{Op: op, Err: e}).
-				Msg("error")
-		}
-	}()
 
 	log.Debug().
 		Str("op", op).
@@ -197,7 +191,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		Str("path", t).
 		Msg("opened a destoribute file")
 
-	r := bufio.NewReader(fi)
+	r := bytes.NewReader(bi)
 	w := bufio.NewWriter(fo)
 	buf := make([]byte, 1024)
 	for {
