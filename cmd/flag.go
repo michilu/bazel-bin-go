@@ -37,7 +37,7 @@ func initFlag() {
 func debugFlag() {
 	const op = "cmd.debugFlag"
 
-	e := log.Debug()
+	e := log.Logger().Debug()
 	if !e.Enabled() {
 		return
 	}

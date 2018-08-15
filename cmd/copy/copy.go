@@ -107,7 +107,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 	err = filepath.Walk(f.from, func(p string, i os.FileInfo, err error) error {
 		const op = "filepath.Walk"
 
-		log.Debug().
+		log.Logger().Debug().
 			Str("op", op).
 			Str("path", p).
 			Msg("start")
@@ -116,7 +116,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 			return &errs.Error{Op: op, Err: err}
 		}
 		if i.IsDir() {
-			log.Debug().
+			log.Logger().Debug().
 				Str("op", op).
 				Str("path", p).
 				Msg("skip directory")
@@ -144,7 +144,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	defer wg.Done()
 	defer func() { sem.Release(1) }()
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("path", p).
 		Msg("copy a file")
@@ -157,7 +157,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		return nil
 	}
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("path", p).
 		Msg("opened a source file")
@@ -186,7 +186,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		}
 	}()
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("path", t).
 		Msg("opened a destoribute file")

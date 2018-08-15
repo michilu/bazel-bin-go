@@ -26,7 +26,7 @@ func init() {
 func Subscribe(topic string, fn interface{}) error {
 	const op = "bus.Subscribe"
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("topic", topic).
 		Msg("start")
@@ -37,7 +37,7 @@ func Subscribe(topic string, fn interface{}) error {
 	}
 	wg.Add(1)
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("topic", topic).
 		Msg("end")
@@ -50,7 +50,7 @@ func Unsubscribe(topic string, fn interface{}) error {
 	const op = "bus.Unsubscribe"
 	defer wg.Done()
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("topic", topic).
 		Msg("start")
@@ -60,7 +60,7 @@ func Unsubscribe(topic string, fn interface{}) error {
 		return &errs.Error{Op: op, Err: err}
 	}
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("topic", topic).
 		Msg("end")

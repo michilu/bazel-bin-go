@@ -53,8 +53,3 @@ func SetLevel(s string) error {
 func Logger() *zerolog.Logger {
 	return &logger
 }
-
-// Debug starts a new message with debug level.
-func Debug() *zerolog.Event {
-	return logger.Debug()
-}

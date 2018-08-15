@@ -25,7 +25,7 @@ func isDirExists(s string) bool {
 	i, err := os.Stat(s)
 	if err != nil {
 
-		log.Debug().
+		log.Logger().Debug().
 			Str("op", op).
 			Str("s", s).
 			Err(&errs.Error{Op: op, Err: err}).
@@ -35,7 +35,7 @@ func isDirExists(s string) bool {
 	}
 	if !i.IsDir() {
 
-		log.Debug().
+		log.Logger().Debug().
 			Str("op", op).
 			Str("s", s).
 			Msgf("%s is a file", s)
@@ -55,7 +55,7 @@ func isFileExists(s string) bool {
 	i, err := os.Stat(s)
 	if err != nil {
 
-		log.Debug().
+		log.Logger().Debug().
 			Str("op", op).
 			Str("s", s).
 			Err(&errs.Error{Op: op, Err: err}).
@@ -65,7 +65,7 @@ func isFileExists(s string) bool {
 	}
 	if i.IsDir() {
 
-		log.Debug().
+		log.Logger().Debug().
 			Str("op", op).
 			Str("s", s).
 			Msgf("%s is a directory", s)

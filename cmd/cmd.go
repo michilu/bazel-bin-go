@@ -85,7 +85,7 @@ func initialize() {
 			Msg("error")
 	}
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("config", viper.ConfigFileUsed()).
 		Msg("using config file")
