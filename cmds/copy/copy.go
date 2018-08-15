@@ -14,11 +14,12 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/codes"
 
-	"v/bazel"
 	"v/bus"
 	"v/errs"
 	"v/log"
 	"v/semaphore"
+
+	"github.com/michilu/bazel-bin-go/bazel"
 )
 
 const (
