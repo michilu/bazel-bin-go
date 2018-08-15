@@ -4,7 +4,7 @@ AUTO_COUNT_LOG:=$(shell git log --since=midnight --oneline|wc -l|tr -d " ")
 COMMIT:=4b825dc
 REVIEWDOG:=| reviewdog -efm='%f:%l:%c: %m' -diff="git diff $(COMMIT) HEAD"
 
-GOBIN:=$(shell (type vgo > /dev/null 2>&1) && echo vgo || echo go)
+GOBIN:=$(shell (type go1.11rc1 > /dev/null 2>&1) && echo GO111MODULE=on go1.11rc1 || echo go)
 PKG:=$(shell $(GOBIN) list)
 NAME:=$(notdir $(PKG))
 GOLIST:=$(shell $(GOBIN) list ./...)
@@ -47,9 +47,9 @@ lint:
 	@echo
 	-goconst $(GOLIST) $(REVIEWDOG)
 	@echo
-	-go vet $(GOLIST) $(REVIEWDOG)
+	-$(GOBIN) vet $(GOLIST) $(REVIEWDOG)
 	@echo
-	-go vet -shadow $(GOLIST) $(REVIEWDOG)
+	-$(GOBIN) vet -shadow $(GOLIST) $(REVIEWDOG)
 	@echo
 	-aligncheck $(GOLIST) $(REVIEWDOG)
 	@echo
