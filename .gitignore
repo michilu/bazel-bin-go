@@ -2,5 +2,9 @@
 
 *.h
 *.so
-/go.sum
-/vendor
+/vendor/b*/
+/vendor/g*/
+go.sum
+vendor/modules.txt
+
+!/vendor/v/
