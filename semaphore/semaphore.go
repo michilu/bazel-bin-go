@@ -25,7 +25,7 @@ func SetParallel(i int) error {
 	const op = "semaphore.SetParallel"
 
 	if i < 1 {
-		return &errs.Error{Op: op, Code: codes.InvalidArgument.String(), Message: "must be 1 or more"}
+		return &errs.Error{Op: op, Code: codes.InvalidArgument, Message: "must be 1 or more"}
 	}
 
 	parallel = i

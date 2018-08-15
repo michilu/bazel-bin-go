@@ -1,17 +1,19 @@
 package errs
 
-// https://middlemost.com/failure-is-your-domain/
+// Ref: https://middlemost.com/failure-is-your-domain/
 
 import (
 	"bytes"
+	"fmt"
 )
 
 // Error defines a standard application error.
 type Error struct {
-	// Machine-readable error code.
-	Code string
+	// Code is a stringable type as defined in the gRPC spec.
+	// https://godoc.org/google.golang.org/grpc/codes#Code
+	Code fmt.Stringer
 
-	// Human-readable message.
+	// Message is a human-readable explanation specific to this occurrence of the error.
 	Message string
 
 	// Logical operation and nested error.
@@ -37,8 +39,8 @@ func (e *Error) Error() string {
 	if e.Err != nil {
 		buf.WriteString(e.Err.Error()) // #nosec
 	} else {
-		if e.Code != "" {
-			buf.WriteString("<" + e.Code + "> ") // #nosec
+		if e.Code != nil {
+			buf.WriteString(e.Code.String() + " ") // #nosec
 		}
 		buf.WriteString(e.Message) // #nosec
 	}

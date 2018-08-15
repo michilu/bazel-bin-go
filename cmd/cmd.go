@@ -48,7 +48,7 @@ func preRunE(cmd *cobra.Command, args []string, f *flags) error {
 		return &errs.Error{Op: op, Err: err}
 	}
 	if !ok {
-		return &errs.Error{Op: op, Code: codes.InvalidArgument.String(), Message: "invalid arguments"}
+		return &errs.Error{Op: op, Code: codes.InvalidArgument, Message: "invalid arguments"}
 	}
 	return nil
 }
