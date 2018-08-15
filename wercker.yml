@@ -17,65 +17,23 @@ build:
         fi
         export PATH=$WERCKER_CACHE_DIR/go/bin:$PATH
   - script:
-      name: vgo
+      name: go module
       code: |
-        go get -d golang.org/x/vgo
-        git -C $(go env GOPATH | awk -F: '{print $1}')/src/golang.org/x/vgo checkout 2093985
-        go install golang.org/x/vgo
+        ( type go1.11rc1 > /dev/null 2>&1 ) || go get golang.org/dl/go1.11rc1 && go1.11rc1 download
   - script:
       name: version
       code: |
-        go version
-        vgo version
-        git -C $(go env GOPATH | awk -F: '{print $1}')/src/golang.org/x/vgo describe --always --dirty=+
+        go1.11rc1 version
   - script:
       name: build
       code: |
         make
         ./bazel-bin-go version
-        vgo build
+        GO111MODULE=on go1.11rc1 build
         ./bazel-bin-go version
   after-steps:
   - slack-notifier:
       url: $SLACK_URL
-
-vgo-head:
-  steps:
-  - script:
-      name: set -x
-      code: set -x
-  - setup-go-workspace
-  - script:
-      name: setup cache for go
-      code: |
-        mkdir -p "$WERCKER_CACHE_DIR/go"
-        if [ -z "$(go env GOPATH)" ]; then
-        export GOPATH=$WERCKER_CACHE_DIR/go
-        else
-        export GOPATH=$WERCKER_CACHE_DIR/go:$(go env GOPATH)
-        fi
-        export PATH=$WERCKER_CACHE_DIR/go/bin:$PATH
-  - script:
-      name: vgo
-      code: |
-        git -C $(go env GOPATH | awk -F: '{print $1}')/src/golang.org/x/vgo checkout master
-        go get -u golang.org/x/vgo
-  - script:
-      name: version
-      code: |
-        go version
-        vgo version
-        git -C $(go env GOPATH | awk -F: '{print $1}')/src/golang.org/x/vgo describe --always --dirty=+
-  - script:
-      name: build
-      code: |
-        vgo_version=2093985
-        vgo_head=$(git -C $(go env GOPATH | awk -F: '{print $1}')/src/golang.org/x/vgo describe --always)
-        [ "$vgo_head" = "$vgo_version" ] && echo 'specified version. skip the build.' || make && fail "build OK!" || echo 'failed.'
-  after-steps:
-  - slack-notifier:
-      url: $SLACK_URL
-      notify_on: failed
 
 lint:
   steps:
