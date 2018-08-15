@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/michilu/bazel-bin-go/errs"
-	"github.com/michilu/bazel-bin-go/log"
-	"github.com/michilu/bazel-bin-go/meta"
-	"github.com/michilu/bazel-bin-go/semaphore"
+	"v/errs"
+	"v/log"
+	"v/meta"
+	"v/semaphore"
 )
 
 var (

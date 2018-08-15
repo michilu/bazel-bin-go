@@ -3,10 +3,10 @@ package bus
 import (
 	"sync"
 
-	"github.com/michilu/bazel-bin-go/log"
 	"github.com/vardius/message-bus"
 
-	"github.com/michilu/bazel-bin-go/errs"
+	"v/errs"
+	"v/log"
 )
 
 var (

@@ -6,8 +6,8 @@ import (
 
 	valid "github.com/asaskevich/govalidator"
 
-	"github.com/michilu/bazel-bin-go/errs"
-	"github.com/michilu/bazel-bin-go/log"
+	"v/errs"
+	"v/log"
 )
 
 func init() {

@@ -9,10 +9,10 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/codes"
 
-	"github.com/michilu/bazel-bin-go/bus"
-	"github.com/michilu/bazel-bin-go/errs"
-	"github.com/michilu/bazel-bin-go/log"
-	"github.com/michilu/bazel-bin-go/meta"
+	"v/bus"
+	"v/errs"
+	"v/log"
+	"v/meta"
 )
 
 var (
@@ -20,7 +20,6 @@ var (
 )
 
 func init() {
-	const op = "cmd.init"
 	app = &cobra.Command{
 		Use:   meta.Name(),
 		Short: "A command-line tool that copies the Go files from the bazel-bin directory to anywhere.",
@@ -30,16 +29,6 @@ func init() {
 	}
 	initFlag()
 	cobra.OnInitialize(initialize)
-	for _, n := range cmds {
-		c, err := n()
-		if err != nil {
-			log.Logger().Fatal().
-				Str("op", op).
-				Err(&errs.Error{Op: op, Err: err}).
-				Msg("error")
-		}
-		app.AddCommand(c)
-	}
 }
 
 func preRunE(cmd *cobra.Command, args []string, f *flags) error {
@@ -95,6 +84,20 @@ func initialize() {
 
 	debugFlag()
 	setSem()
+}
+
+func AddCommand(ns []func() (*cobra.Command, error)) {
+	const op = "cmd.AddCommand"
+	for _, n := range ns {
+		c, err := n()
+		if err != nil {
+			log.Logger().Fatal().
+				Str("op", op).
+				Err(&errs.Error{Op: op, Err: err}).
+				Msg("error")
+		}
+		app.AddCommand(c)
+	}
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

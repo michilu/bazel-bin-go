@@ -27,9 +27,10 @@ build:
   - script:
       name: build
       code: |
+        touch go.mod
         make
         ./bazel-bin-go version
-        GO111MODULE=on go1.11rc1 build
+        go1.11rc1 build
         ./bazel-bin-go version
   after-steps:
   - slack-notifier:

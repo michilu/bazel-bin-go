@@ -4,7 +4,8 @@ AUTO_COUNT_LOG:=$(shell git log --since=midnight --oneline|wc -l|tr -d " ")
 COMMIT:=4b825dc
 REVIEWDOG:=| reviewdog -efm='%f:%l:%c: %m' -diff="git diff $(COMMIT) HEAD"
 
-GOBIN:=$(shell (type go1.11rc1 > /dev/null 2>&1) && echo GO111MODULE=on go1.11rc1 || echo go)
+GOBIN=go1.11rc1
+VGOBIN:=GO111MODULE=on go1.11rc1
 PKG:=$(shell $(GOBIN) list)
 NAME:=$(notdir $(PKG))
 GOLIST:=$(shell $(GOBIN) list ./...)
@@ -13,17 +14,22 @@ GODIR:=$(patsubst $(PKG)/%,%,$(wordlist 2,$(words $(GOLIST)),$(GOLIST)))
 GO:=$(find . -name "*.go" -print)
 LIBGO:=$(wildcard lib/*.go)
 LIB:=$(LIBGO:.go=.so)
+VENDOR:=vendor
 
 .SUFFIXES: .go .so
 .go.so:
 	$(GOBIN) build -buildmode=c-shared -o $@ $<
 
-all: $(GO) $(LIB) test
+all: $(VENDOR) $(GO) $(LIB) test
 	$(GOBIN) build -ldflags=" \
 -X $(PKG)/meta.serial=$(AUTO_COUNT_SINCE).$(AUTO_COUNT_LOG) \
 -X $(PKG)/meta.hash=$(shell git describe --always --dirty=+) \
 -X \"$(PKG)/meta.build=$(shell LANG=en date -u +'%b %d %T %Y')\" \
 "
+
+$(VENDOR): go.mod
+	$(VGOBIN) mod vendor
+	git checkout $(VENDOR)/v
 
 clean:
 	rm -f $(NAME) $(wildcard lib/*.h) $(wildcard lib/*.so)

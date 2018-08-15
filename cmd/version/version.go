@@ -3,7 +3,7 @@ package version
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/michilu/bazel-bin-go/meta"
+	"v/meta"
 )
 
 // New returns a new command.

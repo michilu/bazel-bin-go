@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/michilu/bazel-bin-go/bus"
-	"github.com/michilu/bazel-bin-go/errs"
-	"github.com/michilu/bazel-bin-go/log"
+	"v/bus"
+	"v/errs"
+	"v/log"
 )
 
 var (
