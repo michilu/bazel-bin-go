@@ -20,7 +20,7 @@ func Query() error {
 
 	c := exec.Command("bazel", "query", "//...")
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("path", c.Path).
 		Strs("args", c.Args).
@@ -33,7 +33,7 @@ func Query() error {
 		return &errs.Error{Op: op, Err: err}
 	}
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("path", c.Path).
 		Strs("args", c.Args).

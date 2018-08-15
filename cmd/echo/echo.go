@@ -86,11 +86,12 @@ func echo(s string) {
 		}
 	}()
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("s", s).
 		Msg("echo a file")
 
 	log.Logger().Info().
+		Str("op", op).
 		Msg(s)
 }

@@ -107,7 +107,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 	err = filepath.Walk(f.from, func(p string, i os.FileInfo, err error) error {
 		const op = "filepath.Walk"
 
-		log.Debug().
+		log.Logger().Debug().
 			Str("op", op).
 			Str("path", p).
 			Msg("start")
@@ -116,7 +116,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 			return &errs.Error{Op: op, Err: err}
 		}
 		if i.IsDir() {
-			log.Debug().
+			log.Logger().Debug().
 				Str("op", op).
 				Str("path", p).
 				Msg("skip directory")
@@ -133,6 +133,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 	})
 	if err != nil {
 		log.Logger().Fatal().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 	}
@@ -144,7 +145,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	defer wg.Done()
 	defer func() { sem.Release(1) }()
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("path", p).
 		Msg("copy a file")
@@ -152,12 +153,13 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	bi, err := ioutil.ReadFile(p) // #nosec
 	if err != nil {
 		log.Logger().Warn().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 		return nil
 	}
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("path", p).
 		Msg("opened a source file")
@@ -165,6 +167,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	err = bazel.Query()
 	if err != nil {
 		log.Logger().Warn().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 		return nil
@@ -173,6 +176,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	fo, err := os.Open(t) // #nosec
 	if err != nil {
 		log.Logger().Warn().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 		return nil
@@ -181,12 +185,13 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		const op = "output.Close"
 		if e := fo.Close(); e != nil {
 			log.Logger().Warn().
+				Str("op", op).
 				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 		}
 	}()
 
-	log.Debug().
+	log.Logger().Debug().
 		Str("op", op).
 		Str("path", t).
 		Msg("opened a destoribute file")
@@ -198,6 +203,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		n, e := r.Read(buf)
 		if err != nil && e != io.EOF {
 			log.Logger().Warn().
+				Str("op", op).
 				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 			break
@@ -207,6 +213,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		}
 		if _, e := w.Write(buf[:n]); e != nil {
 			log.Logger().Warn().
+				Str("op", op).
 				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 			break
@@ -214,6 +221,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	}
 	if err = w.Flush(); err != nil {
 		log.Logger().Warn().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 		return nil
