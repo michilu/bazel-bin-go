@@ -22,9 +22,9 @@ VENDOR:=vendor
 
 all: $(VENDOR) $(GO) $(LIB) test
 	$(GOBIN) build -ldflags=" \
--X $(PKG)/meta.serial=$(AUTO_COUNT_SINCE).$(AUTO_COUNT_LOG) \
--X $(PKG)/meta.hash=$(shell git describe --always --dirty=+) \
--X \"$(PKG)/meta.build=$(shell LANG=en date -u +'%b %d %T %Y')\" \
+-X main.serial=$(AUTO_COUNT_SINCE).$(AUTO_COUNT_LOG) \
+-X main.hash=$(shell git describe --always --dirty=+) \
+-X \"main.build=$(shell LANG=en date -u +'%b %d %T %Y')\" \
 "
 
 $(VENDOR): go.mod

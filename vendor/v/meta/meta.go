@@ -8,7 +8,10 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"v/errs"
-	"v/log"
+)
+
+const (
+	buildFmt = "Jan 2 15:04:05 2006"
 )
 
 var (
@@ -16,6 +19,14 @@ var (
 )
 
 type (
+	Meta struct {
+		Build  string
+		Hash   string
+		Name   string
+		SemVer string
+		Serial string
+	}
+
 	meta struct {
 		Build   time.Time `yaml:",omitempty"`
 		Hash    string    `yaml:",omitempty"`
@@ -24,6 +35,7 @@ type (
 		Serial  string    `yaml:",omitempty"`
 		Runtime *runTime  `yaml:",omitempty"`
 	}
+
 	runTime struct {
 		Version string `yaml:",omitempty"`
 		Arch    string `yaml:",omitempty"`
@@ -39,13 +51,15 @@ func (m meta) String() string {
 	return string(o)
 }
 
-func init() {
-	const op = "meta.init"
+// Set sets a meta data.
+func Set(v *Meta) error {
+	const op = "meta.Set"
+
 	m = &meta{
-		Name:   name,
-		Hash:   hash,
-		SemVer: semVer,
-		Serial: serial,
+		Name:   v.Name,
+		Hash:   v.Hash,
+		SemVer: v.SemVer,
+		Serial: v.Serial,
 		Runtime: &runTime{
 			Version: runtime.Version(),
 			Arch:    runtime.GOARCH,
@@ -53,18 +67,16 @@ func init() {
 		},
 	}
 
-	if build == "" {
-		return
+	if v.Build == "" {
+		return nil
 	}
-	t, err := time.Parse(buildFmt, build)
+	t, err := time.Parse(buildFmt, v.Build)
 	if err != nil {
-		log.Logger().Fatal().
-			Str("op", op).
-			Err(&errs.Error{Op: op, Err: err}).
-			Msg("error")
+		return &errs.Error{Op: op, Err: err}
 	}
 	m.Build = t
 
+	return nil
 }
 
 // Get returns a fmt.Stringer.
@@ -74,5 +86,8 @@ func Get() fmt.Stringer {
 
 // Name returns a name.
 func Name() string {
-	return name
+	if m == nil {
+		return ""
+	}
+	return m.Name
 }

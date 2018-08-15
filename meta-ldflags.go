@@ -1,4 +1,4 @@
-package meta
+package main
 
 var (
 	build  string
