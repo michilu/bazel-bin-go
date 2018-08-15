@@ -5,9 +5,9 @@ import (
 
 	"v/cmd"
 
-	"github.com/michilu/bazel-bin-go/cmds/copy"
-	"github.com/michilu/bazel-bin-go/cmds/echo"
-	"github.com/michilu/bazel-bin-go/cmds/version"
+	"github.com/michilu/bazel-bin-go/cmd/copy"
+	"github.com/michilu/bazel-bin-go/cmd/echo"
+	"github.com/michilu/bazel-bin-go/cmd/version"
 )
 
 func main() {
