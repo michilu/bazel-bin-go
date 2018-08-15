@@ -6,7 +6,7 @@ import (
 	sem "github.com/marusama/semaphore"
 	"google.golang.org/grpc/codes"
 
-	"github.com/michilu/bazel-bin-go/errs"
+	"v/errs"
 )
 
 var (

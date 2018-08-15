@@ -3,9 +3,9 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/michilu/bazel-bin-go/cmd/copy"
-	"github.com/michilu/bazel-bin-go/cmd/echo"
-	"github.com/michilu/bazel-bin-go/cmd/version"
+	"github.com/michilu/bazel-bin-go/cmds/copy"
+	"github.com/michilu/bazel-bin-go/cmds/echo"
+	"github.com/michilu/bazel-bin-go/cmds/version"
 )
 
 var (

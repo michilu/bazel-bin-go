@@ -6,9 +6,9 @@ import (
 	"github.com/spf13/viper"
 	"google.golang.org/grpc/codes"
 
-	"github.com/michilu/bazel-bin-go/bus"
-	"github.com/michilu/bazel-bin-go/errs"
-	"github.com/michilu/bazel-bin-go/log"
+	"v/bus"
+	"v/errs"
+	"v/log"
 )
 
 const (
