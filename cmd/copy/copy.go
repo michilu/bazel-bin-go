@@ -133,6 +133,7 @@ func run(cmd *cobra.Command, args []string, f *flag) {
 	})
 	if err != nil {
 		log.Logger().Fatal().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 	}
@@ -152,6 +153,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	bi, err := ioutil.ReadFile(p) // #nosec
 	if err != nil {
 		log.Logger().Warn().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 		return nil
@@ -165,6 +167,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	err = bazel.Query()
 	if err != nil {
 		log.Logger().Warn().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 		return nil
@@ -173,6 +176,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	fo, err := os.Open(t) // #nosec
 	if err != nil {
 		log.Logger().Warn().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 		return nil
@@ -181,6 +185,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		const op = "output.Close"
 		if e := fo.Close(); e != nil {
 			log.Logger().Warn().
+				Str("op", op).
 				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 		}
@@ -198,6 +203,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		n, e := r.Read(buf)
 		if err != nil && e != io.EOF {
 			log.Logger().Warn().
+				Str("op", op).
 				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 			break
@@ -207,6 +213,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 		}
 		if _, e := w.Write(buf[:n]); e != nil {
 			log.Logger().Warn().
+				Str("op", op).
 				Err(&errs.Error{Op: op, Err: e}).
 				Msg("error")
 			break
@@ -214,6 +221,7 @@ func copyFile(p string, i os.FileInfo, f string, t string) error {
 	}
 	if err = w.Flush(); err != nil {
 		log.Logger().Warn().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 		return nil

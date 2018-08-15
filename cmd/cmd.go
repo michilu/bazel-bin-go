@@ -34,6 +34,7 @@ func init() {
 		c, err := n()
 		if err != nil {
 			log.Logger().Fatal().
+				Str("op", op).
 				Err(&errs.Error{Op: op, Err: err}).
 				Msg("error")
 		}
@@ -61,6 +62,7 @@ func initialize() {
 		err := log.SetLevel("debug")
 		if err != nil {
 			log.Logger().Fatal().
+				Str("op", op).
 				Err(&errs.Error{Op: op, Err: err}).
 				Msg("error")
 		}
@@ -81,6 +83,7 @@ func initialize() {
 		viper.ConfigFileNotFoundError:
 	default:
 		log.Logger().Fatal().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 	}
@@ -97,9 +100,11 @@ func initialize() {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the app.
 func Execute() {
+	const op = "cmd.Execute"
 	err := app.Execute()
 	if err != nil {
 		log.Logger().Fatal().
+			Str("op", op).
 			Err(err).
 			Msg("error")
 	}

@@ -59,6 +59,7 @@ func init() {
 	t, err := time.Parse(buildFmt, build)
 	if err != nil {
 		log.Logger().Fatal().
+			Str("op", op).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 	}

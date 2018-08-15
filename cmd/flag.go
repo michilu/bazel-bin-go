@@ -57,6 +57,7 @@ func setSem() {
 	err := semaphore.SetParallel(flag.parallel)
 	if err != nil {
 		log.Logger().Fatal().
+			Str("op", op).
 			Int("flag.parallel", flag.parallel).
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")

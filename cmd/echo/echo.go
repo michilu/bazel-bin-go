@@ -92,5 +92,6 @@ func echo(s string) {
 		Msg("echo a file")
 
 	log.Logger().Info().
+		Str("op", op).
 		Msg(s)
 }
