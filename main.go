@@ -10,6 +10,13 @@ import (
 	"github.com/michilu/bazel-bin-go/cmd/version"
 )
 
+// The go-module gets the imports for the packages they are under the 'vendor/v' directory.
+import (
+	_ "github.com/marusama/semaphore"
+	_ "github.com/rs/zerolog"
+	_ "github.com/vardius/message-bus"
+)
+
 const (
 	name   = "bazel-bin-go"
 	semVer = "1.0.0-alpha"
