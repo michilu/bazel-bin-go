@@ -20,7 +20,7 @@ var (
 )
 
 // Init is initializer.
-func Init() {
+func Init(ns []func() (*cobra.Command, error)) {
 	app = &cobra.Command{
 		Use:   meta.Name(),
 		Short: "A command-line tool that copies the Go files from the bazel-bin directory to anywhere.",
@@ -30,6 +30,7 @@ func Init() {
 	}
 	initFlag()
 	cobra.OnInitialize(initialize)
+	addCommand(ns)
 }
 
 func preRunE(cmd *cobra.Command, args []string, f *flags) error {
@@ -87,8 +88,8 @@ func initialize() {
 	setSem()
 }
 
-func AddCommand(ns []func() (*cobra.Command, error)) {
-	const op = "cmd.AddCommand"
+func addCommand(ns []func() (*cobra.Command, error)) {
+	const op = "cmd.addCommand"
 	for _, n := range ns {
 		c, err := n()
 		if err != nil {

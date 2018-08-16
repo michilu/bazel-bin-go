@@ -13,6 +13,14 @@ import (
 	"github.com/michilu/bazel-bin-go/cmd/version"
 )
 
+var (
+	ns = []func() (*cobra.Command, error){
+		copy.New,
+		echo.New,
+		version.New,
+	}
+)
+
 func init() {
 	const op = "main.init"
 	err := meta.Set(&meta.Meta{
@@ -28,14 +36,9 @@ func init() {
 			Err(&errs.Error{Op: op, Err: err}).
 			Msg("error")
 	}
-	cmd.Init()
+	cmd.Init(ns)
 }
 
 func main() {
-	cmd.AddCommand([]func() (*cobra.Command, error){
-		copy.New,
-		echo.New,
-		version.New,
-	})
 	cmd.Execute()
 }
