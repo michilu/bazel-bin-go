@@ -27,6 +27,9 @@ all: $(VENDOR) $(GO) $(LIB) test
 -X \"main.build=$(shell LANG=en date -u +'%b %d %T %Y')\" \
 "
 
+go.mod:
+	touch $@
+
 $(VENDOR): go.mod
 	$(VGOBIN) mod vendor
 	git checkout vendor/v
