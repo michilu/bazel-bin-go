@@ -33,6 +33,8 @@ $(VENDOR): go.mod
 
 clean:
 	rm -f $(NAME) $(wildcard lib/*.h) $(wildcard lib/*.so)
+	rm -rf vendor
+	git checkout vendor/v
 
 test:
 	$(GOBIN) test
