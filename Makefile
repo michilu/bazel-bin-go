@@ -42,8 +42,7 @@ clean:
 test:
 	$(GOBIN) test
 
-lint:
-	[ "$(GOBIN)" = "vgo" ] && $(GOBIN) mod -vendor
+lint: $(VENDOR)
 	-echo $(GOLIST) | xargs -L1 golint
 	@echo
 	-deadcode $(GODIR) 2>&1
