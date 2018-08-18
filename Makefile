@@ -35,9 +35,8 @@ $(VENDOR): go.mod
 	git checkout vendor/v
 
 clean:
-	rm -f $(NAME) $(wildcard lib/*.h) $(wildcard lib/*.so)
-	rm -rf vendor
-	git checkout vendor/v
+	rm -f $(NAME) $(wildcard lib/*.h) $(wildcard lib/*.so) vendor/modules.txt
+	find vendor -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} \;
 
 test:
 	$(GOBIN) test
