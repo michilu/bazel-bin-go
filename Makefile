@@ -11,7 +11,7 @@ NAME:=$(notdir $(PKG))
 GOLIST:=$(shell $(GOBIN) list ./...)
 GODIR:=$(patsubst $(PKG)/%,%,$(wordlist 2,$(words $(GOLIST)),$(GOLIST)))
 
-GO:=$(find . -name "*.go" -print)
+GO:=$(find . -type d -name vendor -prune -or -type f -name "*.go" -print)
 LIBGO:=$(wildcard lib/*.go)
 LIB:=$(LIBGO:.go=.so)
 VENDOR:=vendor/golang.org
