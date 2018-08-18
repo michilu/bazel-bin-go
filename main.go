@@ -5,6 +5,7 @@ import (
 
 	// The go-module gets the imports for the packages they are under the 'vendor/v' directory.
 	_ "github.com/michilu/bazel-bin-go/v"
+
 	"v/cmd"
 
 	"github.com/michilu/bazel-bin-go/cmd/copy"
