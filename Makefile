@@ -14,7 +14,7 @@ GODIR:=$(patsubst $(PKG)/%,%,$(wordlist 2,$(words $(GOLIST)),$(GOLIST)))
 GO:=$(find . -name "*.go" -print)
 LIBGO:=$(wildcard lib/*.go)
 LIB:=$(LIBGO:.go=.so)
-VENDOR:=vendor
+VENDOR:=vendor/golang.org
 
 .SUFFIXES: .go .so
 .go.so:
@@ -29,10 +29,12 @@ all: $(VENDOR) $(GO) $(LIB) test
 
 $(VENDOR): go.mod
 	$(VGOBIN) mod vendor
-	git checkout $(VENDOR)/v
+	git checkout vendor/v
 
 clean:
 	rm -f $(NAME) $(wildcard lib/*.h) $(wildcard lib/*.so)
+	rm -rf vendor
+	git checkout vendor/v
 
 test:
 	$(GOBIN) test
